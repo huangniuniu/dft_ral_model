@@ -21,8 +21,8 @@
 // -------------------------------------------------------------
 //
 
-typedef class uvm_reg_cbs;
-typedef class uvm_reg_frontdoor;
+//typedef class uvm_reg_cbs;
+//typedef class uvm_reg_frontdoor;
 
 //-----------------------------------------------------------------
 // CLASS: uvm_reg
@@ -335,9 +335,9 @@ virtual class dft_reg extends uvm_object;
    // set the value of the register in the design,
    // only the desired value in its corresponding
    // abstraction class in the RegModel model.
-   // Use the <uvm_reg::update()> method to update the
+   // Use the <dft_reg::update()> method to update the
    // actual register with the mirrored value or
-   // the <uvm_reg::write()> method to set
+   // the <dft_reg::write()> method to set
    // the actual register and its mirrored value.
    //
    // Unless this method is used, the desired value is equal to
@@ -349,9 +349,9 @@ virtual class dft_reg extends uvm_object;
    //
    // To modify the mirrored field values to a specific value,
    // and thus use the mirrored as a scoreboard for the register values
-   // in the DUT, use the <uvm_reg::predict()> method. 
+   // in the DUT, use the <dft_reg::predict()> method. 
    //
-   extern virtual function void set (uvm_reg_data_t  value,
+   extern virtual function void set (bit             value_q[$],
                                      string          fname = "",
                                      int             lineno = 0);
 
@@ -363,10 +363,10 @@ virtual class dft_reg extends uvm_object;
    // Does not actually read the value
    // of the register in the design, only the desired value
    // in the abstraction class. Unless set to a different value
-   // using the <uvm_reg::set()>, the desired value
+   // using the <dft_reg::set()>, the desired value
    // and the mirrored value are identical.
    //
-   // Use the <uvm_reg::read()> or <uvm_reg::peek()>
+   // Use the <dft_reg::read()> or <dft_reg::peek()>
    // method to get the actual register value. 
    //
    // If the register contains write-only fields, the desired/mirrored
@@ -401,7 +401,7 @@ virtual class dft_reg extends uvm_object;
    // Returns 1 if any of the fields need updating
    //
    // See <uvm_reg_field::needs_update()> for details.
-   // Use the <uvm_reg::update()> to actually update the DUT register.
+   // Use the <dft_reg::update()> to actually update the DUT register.
    //
    extern virtual function bit needs_update(); 
 
@@ -470,11 +470,11 @@ virtual class dft_reg extends uvm_object;
    // the register through a physical access is mimicked. For
    // example, read-only bits in the registers will not be written.
    //
-   // The mirrored value will be updated using the <uvm_reg::predict()>
+   // The mirrored value will be updated using the <dft_reg::predict()>
    // method.
    //
    extern virtual task write(output uvm_status_e      status,
-                             input  uvm_reg_data_t    value,
+                             input  bit               value_q,
                              input  uvm_path_e        path = UVM_DEFAULT_PATH,
                              input  uvm_reg_map       map = null,
                              input  uvm_sequence_base parent = null,
@@ -498,7 +498,7 @@ virtual class dft_reg extends uvm_object;
    // the register through a physical access is mimicked. For
    // example, clear-on-read bits in the registers will be set to zero.
    //
-   // The mirrored value will be updated using the <uvm_reg::predict()>
+   // The mirrored value will be updated using the <dft_reg::predict()>
    // method.
    //
    extern virtual task read(output uvm_status_e      status,
@@ -521,7 +521,7 @@ virtual class dft_reg extends uvm_object;
    //
    // Uses the HDL path for the design abstraction specified by ~kind~.
    //
-   // The mirrored value will be updated using the <uvm_reg::predict()>
+   // The mirrored value will be updated using the <dft_reg::predict()>
    // method.
    //
    extern virtual task poke(output uvm_status_e      status,
@@ -543,7 +543,7 @@ virtual class dft_reg extends uvm_object;
    //
    // Uses the HDL path for the design abstraction specified by ~kind~.
    //
-   // The mirrored value will be updated using the <uvm_reg::predict()>
+   // The mirrored value will be updated using the <dft_reg::predict()>
    // method.
    //
    extern virtual task peek(output uvm_status_e      status,
@@ -561,13 +561,13 @@ virtual class dft_reg extends uvm_object;
    // desired value
    //
    // This method performs the reverse
-   // operation of <uvm_reg::mirror()>.
+   // operation of <dft_reg::mirror()>.
    // Write this register if the DUT register is out-of-date with the
    // desired/mirrored value in the abstraction class, as determined by
-   // the <uvm_reg::needs_update()> method.
+   // the <dft_reg::needs_update()> method.
    //
    // The update can be performed using the using the physical interfaces
-   // (frontdoor) or <uvm_reg::poke()> (backdoor) access.
+   // (frontdoor) or <dft_reg::poke()> (backdoor) access.
    // If the register is mapped in multiple address maps and physical access
    // is used (front-door), an address ~map~ must be specified.
    //
@@ -587,11 +587,11 @@ virtual class dft_reg extends uvm_object;
    //
    // Read the register and optionally compared the readback value
    // with the current mirrored value if ~check~ is <UVM_CHECK>.
-   // The mirrored value will be updated using the <uvm_reg::predict()>
+   // The mirrored value will be updated using the <dft_reg::predict()>
    // method based on the readback value.
    //
    // The mirroring can be performed using the physical interfaces (frontdoor)
-   // or <uvm_reg::peek()> (backdoor).
+   // or <dft_reg::peek()> (backdoor).
    //
    // If ~check~ is specified as UVM_CHECK,
    // an error message is issued if the current mirrored value
@@ -710,7 +710,7 @@ virtual class dft_reg extends uvm_object;
    //
    // If ~null~, no user-defined frontdoor has been defined.
    // A user-defined frontdoor is defined
-   // by using the <uvm_reg::set_frontdoor()> method. 
+   // by using the <dft_reg::set_frontdoor()> method. 
    //
    // If the register is mapped in multiple address maps, an address ~map~
    // must be specified.
@@ -729,7 +729,7 @@ virtual class dft_reg extends uvm_object;
    //
    // By default, registers are accessed via the built-in string-based
    // DPI routines if an HDL path has been specified using the
-   // <uvm_reg::configure()> or <uvm_reg::add_hdl_path()> method.
+   // <dft_reg::configure()> or <dft_reg::add_hdl_path()> method.
    //
    // If this default mechanism is not suitable (e.g. because
    // the register is not implemented in pure SystemVerilog)
@@ -752,7 +752,7 @@ virtual class dft_reg extends uvm_object;
    //
    // If ~null~, no user-defined backdoor has been defined.
    // A user-defined backdoor is defined
-   // by using the <uvm_reg::set_backdoor()> method. 
+   // by using the <dft_reg::set_backdoor()> method. 
    //
    // If ~inherited~ is TRUE, returns the backdoor of the parent block
    // if none have been specified for this register.
@@ -876,7 +876,7 @@ virtual class dft_reg extends uvm_object;
    //
    // Override the default string-based DPI backdoor access read
    // for this register type.
-   // By default calls <uvm_reg::backdoor_read_func()>.
+   // By default calls <dft_reg::backdoor_read_func()>.
    //
    extern virtual task backdoor_read(uvm_reg_item rw);
 
@@ -938,12 +938,12 @@ virtual class dft_reg extends uvm_object;
    // or simple pattern.
    // See <uvm_resource_base::Scope Interface> for more details.
    //
-   //| uvm_reg::include_coverage("*", UVM_CVR_ALL);
+   //| dft_reg::include_coverage("*", UVM_CVR_ALL);
    //
    // The specification of which coverage model to include in
    // which abstraction class is stored in a <uvm_reg_cvr_t> resource in the
    // <uvm_resource_db> resource database,
-   // in the "uvm_reg::" scope namespace.
+   // in the "dft_reg::" scope namespace.
    //
    extern static function void include_coverage(string scope,
                                                 uvm_reg_cvr_t models,
@@ -955,7 +955,7 @@ virtual class dft_reg extends uvm_object;
    //
    // Check which of the specified coverage model must be built
    // in this instance of the register abstraction class,
-   // as specified by calls to <uvm_reg::include_coverage()>.
+   // as specified by calls to <dft_reg::include_coverage()>.
    //
    // Models are specified by adding the symbolic value of individual
    // coverage model as defined in <uvm_coverage_model_e>.
@@ -1010,7 +1010,7 @@ virtual class dft_reg extends uvm_object;
    // This method can only control the measurement of functional
    // coverage models that are present in the register abstraction classes,
    // then enabled during construction.
-   // See the <uvm_reg::has_coverage()> method to identify
+   // See the <dft_reg::has_coverage()> method to identify
    // the available functional coverage models.
    //
    extern virtual function uvm_reg_cvr_t set_coverage(uvm_reg_cvr_t is_on);
@@ -1025,7 +1025,7 @@ virtual class dft_reg extends uvm_object;
    // Multiple functional coverage models can be specified by adding the
    // functional coverage model identifiers.
    //
-   // See <uvm_reg::set_coverage()> for more details. 
+   // See <dft_reg::set_coverage()> for more details. 
    //
    extern virtual function bit get_coverage(uvm_reg_cvr_t is_on);
 
@@ -1157,7 +1157,7 @@ virtual class dft_reg extends uvm_object;
                                                        uvm_comparer comparer);
    extern virtual function void            do_pack    (uvm_packer packer);
    extern virtual function void            do_unpack  (uvm_packer packer);
-   extern virtual function string          print_array_value (bit array_d[]);
+   extern virtual function string          print_array_value (uvm_reg_item rw);
 
 endclass: dft_reg
 
@@ -1168,7 +1168,7 @@ endclass: dft_reg
 
 // new
 
-function uvm_reg::new(string name="", int unsigned n_bits, int has_coverage);
+function dft_reg::new(string name="", int unsigned n_bits, int has_coverage);
    super.new(name);
    if (n_bits == 0) begin
       `uvm_error("RegModel", $sformatf("Register \"%s\" cannot have 0 bits", get_name()));
@@ -1191,11 +1191,11 @@ endfunction: new
 
 // configure
 
-function void uvm_reg::configure (uvm_reg_block blk_parent,
+function void dft_reg::configure (uvm_reg_block blk_parent,
                                   uvm_reg_file regfile_parent=null,
                                   string hdl_path = "");
    if (blk_parent == null) begin
-     `uvm_error("UVM/REG/CFG/NOBLK", {"uvm_reg::configure() called without a parent block for instance \"", get_name(), "\" of register type \"", get_type_name(), "\"."})
+     `uvm_error("UVM/REG/CFG/NOBLK", {"dft_reg::configure() called without a parent block for instance \"", get_name(), "\" of register type \"", get_type_name(), "\"."})
      return;
    end
 
@@ -1209,7 +1209,7 @@ endfunction: configure
 
 // add_field
 
-function void uvm_reg::add_field(uvm_reg_field field);
+function void dft_reg::add_field(uvm_reg_field field);
    int offset;
    int idx;
    
@@ -1269,7 +1269,7 @@ endfunction: add_field
 
 // Xlock_modelX
 
-function void uvm_reg::Xlock_modelX();
+function void dft_reg::Xlock_modelX();
    if (m_locked)
      return;
    m_locked = 1;
@@ -1282,7 +1282,7 @@ endfunction
 
 // set_frontdoor
 
-function void uvm_reg::set_frontdoor(uvm_reg_frontdoor ftdr,
+function void dft_reg::set_frontdoor(uvm_reg_frontdoor ftdr,
                                      uvm_reg_map       map = null,
                                      string            fname = "",
                                      int               lineno = 0);
@@ -1303,7 +1303,7 @@ endfunction: set_frontdoor
 
 // get_frontdoor
 
-function uvm_reg_frontdoor uvm_reg::get_frontdoor(uvm_reg_map map = null);
+function uvm_reg_frontdoor dft_reg::get_frontdoor(uvm_reg_map map = null);
    uvm_reg_map_info map_info;
    map = get_local_map(map, "get_frontdoor()");
    if (map == null)
@@ -1315,7 +1315,7 @@ endfunction: get_frontdoor
 
 // set_backdoor
 
-function void uvm_reg::set_backdoor(uvm_reg_backdoor bkdr,
+function void dft_reg::set_backdoor(uvm_reg_backdoor bkdr,
                                     string           fname = "",
                                     int              lineno = 0);
    bkdr.fname = fname;
@@ -1330,7 +1330,7 @@ endfunction: set_backdoor
 
 // get_backdoor
 
-function uvm_reg_backdoor uvm_reg::get_backdoor(bit inherited = 1);
+function uvm_reg_backdoor dft_reg::get_backdoor(bit inherited = 1);
 
    if (m_backdoor == null && inherited) begin
      uvm_reg_block blk = get_parent();
@@ -1351,7 +1351,7 @@ endfunction: get_backdoor
 
 // clear_hdl_path
 
-function void uvm_reg::clear_hdl_path(string kind = "RTL");
+function void dft_reg::clear_hdl_path(string kind = "RTL");
   if (kind == "ALL") begin
     m_hdl_paths_pool = new("hdl_paths");
     return;
@@ -1375,7 +1375,7 @@ endfunction
 
 // add_hdl_path
 
-function void uvm_reg::add_hdl_path(uvm_hdl_path_slice slices[],
+function void dft_reg::add_hdl_path(uvm_hdl_path_slice slices[],
                                     string kind = "RTL");
     uvm_queue #(uvm_hdl_path_concat) paths = m_hdl_paths_pool.get(kind);
     uvm_hdl_path_concat concat = new();
@@ -1387,7 +1387,7 @@ endfunction
 
 // add_hdl_path_slice
 
-function void uvm_reg::add_hdl_path_slice(string name,
+function void dft_reg::add_hdl_path_slice(string name,
                                           int offset,
                                           int size,
                                           bit first = 0,
@@ -1408,7 +1408,7 @@ endfunction
 
 // has_hdl_path
 
-function bit  uvm_reg::has_hdl_path(string kind = "");
+function bit  dft_reg::has_hdl_path(string kind = "");
   if (kind == "") begin
      if (m_regfile_parent != null)
         kind = m_regfile_parent.get_default_hdl_path();
@@ -1422,7 +1422,7 @@ endfunction
 
 // get_hdl_path_kinds
 
-function void uvm_reg::get_hdl_path_kinds (ref string kinds[$]);
+function void dft_reg::get_hdl_path_kinds (ref string kinds[$]);
   string kind;
   kinds.delete();
   if (!m_hdl_paths_pool.first(kind))
@@ -1435,7 +1435,7 @@ endfunction
 
 // get_hdl_path
 
-function void uvm_reg::get_hdl_path(ref uvm_hdl_path_concat paths[$],
+function void dft_reg::get_hdl_path(ref uvm_hdl_path_concat paths[$],
                                         input string kind = "");
 
   uvm_queue #(uvm_hdl_path_concat) hdl_paths;
@@ -1464,7 +1464,7 @@ endfunction
 
 // get_full_hdl_path
 
-function void uvm_reg::get_full_hdl_path(ref uvm_hdl_path_concat paths[$],
+function void dft_reg::get_full_hdl_path(ref uvm_hdl_path_concat paths[$],
                                          input string kind = "",
                                          input string separator = ".");
 
@@ -1513,7 +1513,7 @@ endfunction
 
 // set_offset
 
-function void uvm_reg::set_offset (uvm_reg_map    map,
+function void dft_reg::set_offset (uvm_reg_map    map,
                                    uvm_reg_addr_t offset,
                                    bit unmapped = 0);
 
@@ -1536,7 +1536,7 @@ endfunction
 
 // set_parent
 
-function void uvm_reg::set_parent(uvm_reg_block blk_parent,
+function void dft_reg::set_parent(uvm_reg_block blk_parent,
                                       uvm_reg_file regfile_parent);
   if (m_parent != null) begin
      // ToDo: remove register from previous parent
@@ -1548,21 +1548,21 @@ endfunction
 
 // get_parent
 
-function uvm_reg_block uvm_reg::get_parent();
+function uvm_reg_block dft_reg::get_parent();
   return get_block();
 endfunction
 
 
 // get_regfile
 
-function uvm_reg_file uvm_reg::get_regfile();
+function uvm_reg_file dft_reg::get_regfile();
    return m_regfile_parent;
 endfunction
 
 
 // get_full_name
 
-function string uvm_reg::get_full_name();
+function string dft_reg::get_full_name();
 
    if (m_regfile_parent != null)
       return {m_regfile_parent.get_full_name(), ".", get_name()};
@@ -1576,14 +1576,14 @@ endfunction: get_full_name
 
 // add_map
 
-function void uvm_reg::add_map(uvm_reg_map map);
+function void dft_reg::add_map(uvm_reg_map map);
   m_maps[map] = 1;
 endfunction
 
 
 // get_maps
 
-function void uvm_reg::get_maps(ref uvm_reg_map maps[$]);
+function void dft_reg::get_maps(ref uvm_reg_map maps[$]);
    foreach (m_maps[map])
      maps.push_back(map);
 endfunction
@@ -1591,14 +1591,14 @@ endfunction
 
 // get_n_maps
 
-function int uvm_reg::get_n_maps();
+function int dft_reg::get_n_maps();
    return m_maps.num();
 endfunction
 
 
 // is_in_map
 
-function bit uvm_reg::is_in_map(uvm_reg_map map);
+function bit dft_reg::is_in_map(uvm_reg_map map);
    if (m_maps.exists(map))
      return 1;
    foreach (m_maps[l]) begin
@@ -1618,7 +1618,7 @@ endfunction
 
 // get_local_map
 
-function uvm_reg_map uvm_reg::get_local_map(uvm_reg_map map, string caller="");
+function uvm_reg_map dft_reg::get_local_map(uvm_reg_map map, string caller="");
    if (map == null)
      return get_default_map();
    if (m_maps.exists(map))
@@ -1643,7 +1643,7 @@ endfunction
 
 // get_default_map
 
-function uvm_reg_map uvm_reg::get_default_map(string caller="");
+function uvm_reg_map dft_reg::get_default_map(string caller="");
 
    // if reg is not associated with any map, return ~null~
    if (m_maps.num() == 0) begin
@@ -1685,7 +1685,7 @@ endfunction
 
 // get_rights
 
-function string uvm_reg::get_rights(uvm_reg_map map = null);
+function string dft_reg::get_rights(uvm_reg_map map = null);
 
    uvm_reg_map_info info;
 
@@ -1703,14 +1703,14 @@ endfunction
 
 // get_block
 
-function uvm_reg_block uvm_reg::get_block();
+function uvm_reg_block dft_reg::get_block();
    get_block = m_parent;
 endfunction
 
 
 // get_offset
 
-function uvm_reg_addr_t uvm_reg::get_offset(uvm_reg_map map = null);
+function uvm_reg_addr_t dft_reg::get_offset(uvm_reg_map map = null);
 
    uvm_reg_map_info map_info;
    uvm_reg_map orig_map = map;
@@ -1736,7 +1736,7 @@ endfunction
 
 // get_addresses
 
-function int uvm_reg::get_addresses(uvm_reg_map map=null, ref uvm_reg_addr_t addr[]);
+function int dft_reg::get_addresses(uvm_reg_map map=null, ref uvm_reg_addr_t addr[]);
 
    uvm_reg_map_info map_info;
    uvm_reg_map system_map;
@@ -1765,7 +1765,7 @@ endfunction
 
 // get_address
 
-function uvm_reg_addr_t uvm_reg::get_address(uvm_reg_map map = null);
+function uvm_reg_addr_t dft_reg::get_address(uvm_reg_map map = null);
    uvm_reg_addr_t  addr[];
    void'(get_addresses(map,addr));
    return addr[0];
@@ -1774,28 +1774,28 @@ endfunction
 
 // get_n_bits
 
-function int unsigned uvm_reg::get_n_bits();
+function int unsigned dft_reg::get_n_bits();
    return m_n_bits;
 endfunction
 
 
 // get_n_bytes
 
-function int unsigned uvm_reg::get_n_bytes();
+function int unsigned dft_reg::get_n_bytes();
    return ((m_n_bits-1) / 8) + 1;
 endfunction
 
 
 // get_max_size
 
-function int unsigned uvm_reg::get_max_size();
+function int unsigned dft_reg::get_max_size();
    return m_max_size;
 endfunction: get_max_size
 
 
 // get_fields
 
-function void uvm_reg::get_fields(ref uvm_reg_field fields[$]);
+function void dft_reg::get_fields(ref uvm_reg_field fields[$]);
    foreach(m_fields[i])
       fields.push_back(m_fields[i]);
 endfunction
@@ -1803,7 +1803,7 @@ endfunction
 
 // get_field_by_name
 
-function uvm_reg_field uvm_reg::get_field_by_name(string name);
+function uvm_reg_field dft_reg::get_field_by_name(string name);
    foreach (m_fields[i])
       if (m_fields[i].get_name() == name)
          return m_fields[i];
@@ -1819,7 +1819,7 @@ endfunction
 // Returns "RO" if all of the fields in the registers are read-only
 // Returns "RW" otherwise.
 
-function string uvm_reg::Xget_fields_accessX(uvm_reg_map map);
+function string dft_reg::Xget_fields_accessX(uvm_reg_map map);
    bit is_R;
    bit is_W;
    
@@ -1858,10 +1858,10 @@ endfunction
 
 // include_coverage
 
-function void uvm_reg::include_coverage(string scope,
+function void dft_reg::include_coverage(string scope,
                                         uvm_reg_cvr_t models,
                                         uvm_object accessor = null);
-   uvm_reg_cvr_rsrc_db::set({"uvm_reg::", scope},
+   uvm_reg_cvr_rsrc_db::set({"dft_reg::", scope},
                             "include_coverage",
                             models, accessor);
 endfunction
@@ -1869,9 +1869,9 @@ endfunction
 
 // build_coverage
 
-function uvm_reg_cvr_t uvm_reg::build_coverage(uvm_reg_cvr_t models);
+function uvm_reg_cvr_t dft_reg::build_coverage(uvm_reg_cvr_t models);
    build_coverage = UVM_NO_COVERAGE;
-   void'(uvm_reg_cvr_rsrc_db::read_by_name({"uvm_reg::", get_full_name()},
+   void'(uvm_reg_cvr_rsrc_db::read_by_name({"dft_reg::", get_full_name()},
                                            "include_coverage",
                                            build_coverage, this));
    return build_coverage & models;
@@ -1880,21 +1880,21 @@ endfunction: build_coverage
 
 // add_coverage
 
-function void uvm_reg::add_coverage(uvm_reg_cvr_t models);
+function void dft_reg::add_coverage(uvm_reg_cvr_t models);
    m_has_cover |= models;
 endfunction: add_coverage
 
 
 // has_coverage
 
-function bit uvm_reg::has_coverage(uvm_reg_cvr_t models);
+function bit dft_reg::has_coverage(uvm_reg_cvr_t models);
    return ((m_has_cover & models) == models);
 endfunction: has_coverage
 
 
 // set_coverage
 
-function uvm_reg_cvr_t uvm_reg::set_coverage(uvm_reg_cvr_t is_on);
+function uvm_reg_cvr_t dft_reg::set_coverage(uvm_reg_cvr_t is_on);
    if (is_on == uvm_reg_cvr_t'(UVM_NO_COVERAGE)) begin
       m_cover_on = is_on;
       return m_cover_on;
@@ -1908,7 +1908,7 @@ endfunction: set_coverage
 
 // get_coverage
 
-function bit uvm_reg::get_coverage(uvm_reg_cvr_t is_on);
+function bit dft_reg::get_coverage(uvm_reg_cvr_t is_on);
    if (has_coverage(is_on) == 0)
       return 0;
    return ((m_cover_on & is_on) == is_on);
@@ -1923,7 +1923,7 @@ endfunction: get_coverage
 
 // set
 
-function void dft_reg::set(bit             value_q,
+function void dft_reg::set(bit             value_q[$],
                            string          fname = "",
                            int             lineno = 0);
 
@@ -1933,7 +1933,7 @@ function void dft_reg::set(bit             value_q,
    m_lineno = lineno;
    
    foreach (m_fields[i]) begin
-      for(int f_val_idx=0; f_val_idx<m_fields[i].get_lsb_pos(); f_val_idx++) void`(value_q.pop_front());
+      for(int f_val_idx=0; f_val_idx<m_fields[i].get_lsb_pos(); f_val_idx++) void'(value_q.pop_front());
       for(int f_val_idx=0; f_val_idx<m_fields[i].get_n_bits(); f_val_idx++) value[f_val_idx] = value_q.pop_front();
       m_fields[i].set(value);
       //m_fields[i].set((value >> m_fields[i].get_lsb_pos()) & ((1 << m_fields[i].get_n_bits()) - 1));
@@ -1943,7 +1943,7 @@ endfunction: set
 
 // predict
 
-function bit uvm_reg::predict (uvm_reg_data_t    value,
+function bit dft_reg::predict (uvm_reg_data_t    value,
                                uvm_reg_byte_en_t be = -1,
                                uvm_predict_e     kind = UVM_PREDICT_DIRECT,
                                uvm_path_e        path = UVM_FRONTDOOR,
@@ -1963,16 +1963,22 @@ endfunction: predict
 
 // do_predict
 
-function void uvm_reg::do_predict(uvm_reg_item      rw,
+function void dft_reg::do_predict(uvm_reg_item      rw,
                                   uvm_predict_e     kind = UVM_PREDICT_DIRECT,
                                   uvm_reg_byte_en_t be = -1);
 
-   uvm_reg_data_t reg_value = rw.value[0];
+   //uvm_reg_data_t reg_value = rw.value[0];
+   uvm_reg_data_t field_value;
+   bit            value_q;
+
+   for(int i=0; i<rw.value.size(); i++)
+      for(int j=0; j<`UVM_REG_DATA_WIDTH; j++) value_q.push_back(rw.value[i][j]);
+
    m_fname = rw.fname;
    m_lineno = rw.lineno;
    
-if (rw.status ==UVM_IS_OK )
-   rw.status = UVM_IS_OK;
+   if (rw.status ==UVM_IS_OK )
+      rw.status = UVM_IS_OK;
 
    if (m_is_busy && kind == UVM_PREDICT_DIRECT) begin
       `uvm_warning("RegModel", {"Trying to predict value of register '",
@@ -1982,19 +1988,22 @@ if (rw.status ==UVM_IS_OK )
    end
    
    foreach (m_fields[i]) begin
-      rw.value[0] = (reg_value >> m_fields[i].get_lsb_pos()) &
-                                 ((1 << m_fields[i].get_n_bits())-1);
+      //rw.value[0] = (reg_value >> m_fields[i].get_lsb_pos()) & ((1 << m_fields[i].get_n_bits())-1);
+      for(int i=0; i<m_fields[i].get_n_bits; i++) field_value[i] = value_q.pop_front();
+      rw.value[0] = field_value;
       m_fields[i].do_predict(rw, kind, be>>(m_fields[i].get_lsb_pos()/8));
+      //clear vaule for next interation.
+      field_value = 0;
    end
 
-   rw.value[0] = reg_value;
+   //rw.value[0] = reg_value;
 
 endfunction: do_predict
 
 
 // get
 
-function uvm_reg_data_t  uvm_reg::get(string  fname = "",
+function uvm_reg_data_t  dft_reg::get(string  fname = "",
                                       int     lineno = 0);
    // Concatenate the value of the individual fields
    // to form the register value
@@ -2010,7 +2019,7 @@ endfunction: get
 
 // get_mirrored_value
 
-function uvm_reg_data_t  uvm_reg::get_mirrored_value(string  fname = "",
+function uvm_reg_data_t  dft_reg::get_mirrored_value(string  fname = "",
                                       int     lineno = 0);
    // Concatenate the value of the individual fields
    // to form the register value
@@ -2026,7 +2035,7 @@ endfunction: get_mirrored_value
 
 // reset
 
-function void uvm_reg::reset(string kind = "HARD");
+function void dft_reg::reset(string kind = "HARD");
    foreach (m_fields[i])
       m_fields[i].reset(kind);
    // Put back a key in the semaphore if it is checked out
@@ -2040,7 +2049,7 @@ endfunction: reset
 
 // get_reset
 
-function uvm_reg_data_t uvm_reg::get_reset(string kind = "HARD");
+function uvm_reg_data_t dft_reg::get_reset(string kind = "HARD");
    // Concatenate the value of the individual fields
    // to form the register value
    get_reset = 0;
@@ -2052,7 +2061,7 @@ endfunction: get_reset
 
 // has_reset
 
-function bit uvm_reg::has_reset(string kind = "HARD",
+function bit dft_reg::has_reset(string kind = "HARD",
                                 bit    delete = 0);
 
    has_reset = 0;
@@ -2066,7 +2075,7 @@ endfunction: has_reset
 
 // set_reset
 
-function void uvm_reg::set_reset(uvm_reg_data_t value,
+function void dft_reg::set_reset(uvm_reg_data_t value,
                                  string         kind = "HARD");
    foreach (m_fields[i]) begin
       m_fields[i].set_reset(value >> m_fields[i].get_lsb_pos(), kind);
@@ -2080,7 +2089,7 @@ endfunction: set_reset
 
 // needs_update
 
-function bit uvm_reg::needs_update();
+function bit dft_reg::needs_update();
    needs_update = 0;
    foreach (m_fields[i]) begin
       if (m_fields[i].needs_update()) begin
@@ -2092,7 +2101,7 @@ endfunction: needs_update
 
 // update
 
-task uvm_reg::update(output uvm_status_e      status,
+task dft_reg::update(output uvm_status_e      status,
                      input  uvm_path_e        path = UVM_DEFAULT_PATH,
                      input  uvm_reg_map       map = null,
                      input  uvm_sequence_base parent = null,
@@ -2163,11 +2172,10 @@ task dft_reg::write(output uvm_status_e      status,
    value_size = quotient + (remainder ? 1 : 0);
    
    rw.value.delete();
-   rw.value.new[value_size];
+   rw.value = new[value_size];
    for(int val_idx=0; val_idx<quotient; val_idx++)
       for(int i=0; i<`UVM_REG_DATA_WIDTH; i++) rw.value[val_idx][i] = value_q.pop_front();
-   end
-
+   
    if(remainder!=0)
       for(int i=0; i<remainder; i++) rw.value[value_size-1][i] = value_q.pop_front();
 
@@ -2359,7 +2367,7 @@ task dft_reg::do_write (uvm_reg_item rw);
        path_s = (get_backdoor() != null) ? "user backdoor" : "DPI backdoor";
 
      //value_s = $sformatf("=0x%0h",rw.value[0]);
-     value_s = print_array_value(rw.value);
+     value_s = print_array_value(rw);
 
      uvm_report_info("RegModel", {"Wrote register via ",path_s,": ",
                                    get_full_name(),value_s}, UVM_HIGH);
@@ -2373,7 +2381,7 @@ endtask: do_write
 
 // read
 
-task uvm_reg::read(output uvm_status_e      status,
+task dft_reg::read(output uvm_status_e      status,
                    output uvm_reg_data_t    value,
                    input  uvm_path_e        path = UVM_DEFAULT_PATH,
                    input  uvm_reg_map       map = null,
@@ -2390,7 +2398,7 @@ endtask: read
 
 // XreadX
 
-task uvm_reg::XreadX(output uvm_status_e      status,
+task dft_reg::XreadX(output uvm_status_e      status,
                      output uvm_reg_data_t    value,
                      input  uvm_path_e        path,
                      input  uvm_reg_map       map,
@@ -2425,7 +2433,7 @@ endtask: XreadX
 
 // do_read
 
-task uvm_reg::do_read(uvm_reg_item rw);
+task dft_reg::do_read(uvm_reg_item rw);
 
    uvm_reg_cb_iter  cbs = new(this);
    uvm_reg_map_info map_info;
@@ -2630,7 +2638,7 @@ endtask: do_read
 
 // Xcheck_accessX
 
-function bit uvm_reg::Xcheck_accessX (input uvm_reg_item rw,
+function bit dft_reg::Xcheck_accessX (input uvm_reg_item rw,
                                       output uvm_reg_map_info map_info,
                                       input string caller);
 
@@ -2682,28 +2690,28 @@ endfunction
 
 // is_busy
 
-function bit uvm_reg::is_busy();
+function bit dft_reg::is_busy();
    return m_is_busy;
 endfunction
     
 
 // Xset_busyX
 
-function void uvm_reg::Xset_busyX(bit busy);
+function void dft_reg::Xset_busyX(bit busy);
    m_is_busy = busy;
 endfunction
     
 
 // Xis_loacked_by_fieldX
 
-function bit uvm_reg::Xis_locked_by_fieldX();
+function bit dft_reg::Xis_locked_by_fieldX();
   return m_is_locked_by_field;
 endfunction
     
 
 // backdoor_write
 
-task  uvm_reg::backdoor_write(uvm_reg_item rw);
+task  dft_reg::backdoor_write(uvm_reg_item rw);
   uvm_hdl_path_concat paths[$];
   bit ok=1;
   get_full_hdl_path(paths,rw.bd_kind);
@@ -2731,14 +2739,14 @@ endtask
 
 // backdoor_read
 
-task  uvm_reg::backdoor_read (uvm_reg_item rw);
+task  dft_reg::backdoor_read (uvm_reg_item rw);
   rw.status = backdoor_read_func(rw);
 endtask
 
 
 // backdoor_read_func
 
-function uvm_status_e uvm_reg::backdoor_read_func(uvm_reg_item rw);
+function uvm_status_e dft_reg::backdoor_read_func(uvm_reg_item rw);
   uvm_hdl_path_concat paths[$];
   uvm_reg_data_t val;
   bit ok=1;
@@ -2791,7 +2799,7 @@ endfunction
 
 // poke
 
-task uvm_reg::poke(output uvm_status_e      status,
+task dft_reg::poke(output uvm_status_e      status,
                    input  uvm_reg_data_t    value,
                    input  string            kind = "",
                    input  uvm_sequence_base parent = null,
@@ -2848,7 +2856,7 @@ endtask: poke
 
 // peek
 
-task uvm_reg::peek(output uvm_status_e      status,
+task dft_reg::peek(output uvm_status_e      status,
                    output uvm_reg_data_t    value,
                    input  string            kind = "",
                    input  uvm_sequence_base parent = null,
@@ -2904,7 +2912,7 @@ endtask: peek
 
 
 // do_check
-function bit uvm_reg::do_check(input uvm_reg_data_t expected,
+function bit dft_reg::do_check(input uvm_reg_data_t expected,
                                input uvm_reg_data_t actual,
                                uvm_reg_map          map);
 
@@ -2953,7 +2961,7 @@ endfunction
 
 // mirror
 
-task uvm_reg::mirror(output uvm_status_e       status,
+task dft_reg::mirror(output uvm_status_e       status,
                      input  uvm_check_e        check = UVM_NO_CHECK,
                      input  uvm_path_e         path = UVM_DEFAULT_PATH,
                      input  uvm_reg_map        map = null,
@@ -3001,7 +3009,7 @@ endtask: mirror
 
 // XatomicX
 
-task uvm_reg::XatomicX(bit on);
+task dft_reg::XatomicX(bit on);
    process m_reg_process;
    m_reg_process=process::self();
 
@@ -3026,7 +3034,7 @@ endtask: XatomicX
 
 // convert2string
 
-function string uvm_reg::convert2string();
+function string dft_reg::convert2string();
    string res_str;
    string t_str;
    bit with_debug_info;
@@ -3082,7 +3090,7 @@ endfunction: convert2string
 
 // do_print
 
-function void uvm_reg::do_print (uvm_printer printer);
+function void dft_reg::do_print (uvm_printer printer);
   uvm_reg_field f[$];
   super.do_print(printer);
   get_fields(f);
@@ -3093,21 +3101,21 @@ endfunction
 
 // clone
 
-function uvm_object uvm_reg::clone();
+function uvm_object dft_reg::clone();
   `uvm_fatal("RegModel","RegModel registers cannot be cloned")
   return null;
 endfunction
 
 // do_copy
 
-function void uvm_reg::do_copy(uvm_object rhs);
+function void dft_reg::do_copy(uvm_object rhs);
   `uvm_fatal("RegModel","RegModel registers cannot be copied")
 endfunction
 
 
 // do_compare
 
-function bit uvm_reg::do_compare (uvm_object  rhs,
+function bit dft_reg::do_compare (uvm_object  rhs,
                                         uvm_comparer comparer);
   `uvm_warning("RegModel","RegModel registers cannot be compared")
   return 0;
@@ -3116,15 +3124,39 @@ endfunction
 
 // do_pack
 
-function void uvm_reg::do_pack (uvm_packer packer);
+function void dft_reg::do_pack (uvm_packer packer);
   `uvm_warning("RegModel","RegModel registers cannot be packed")
 endfunction
 
 
 // do_unpack
 
-function void uvm_reg::do_unpack (uvm_packer packer);
+function void dft_reg::do_unpack (uvm_packer packer);
   `uvm_warning("RegModel","RegModel registers cannot be unpacked")
 endfunction
 
 
+function string dft_reg::print_array_value (uvm_reg_item rw);
+   int unsigned         array_size;
+   int unsigned         remainder;
+   uvm_reg_data_t       value;
+   string               s;
+   array_size = rw.value.size();
+
+   remainder = rw.n_bits - `UVM_REG_DATA_WIDTH*(array_size-1);
+
+   if(`UVM_REG_DATA_WIDTH % 4 != 0) `uvm_warning("RegModel", "UVM_REG_DATA_WIDTH%4 != 0, will cause dft_reg::print_array_value error.");
+
+   for(int i=0; i<array_size-1; i++) begin
+      foreach(rw.value[i][j]) value[j] = rw.value[i][j];
+      $sformat(s,"%0h%s",value,s);
+   end
+
+   begin
+      for(int j=0; j<remainder; j++) value[j] = rw.value[array_size-1][j];
+      $sformat(s,"%0h%s",value,s);
+   end
+
+   $sformat(s,"0x%s",s);
+   return s;
+endfunction

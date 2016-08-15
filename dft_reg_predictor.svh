@@ -142,6 +142,7 @@ class uvm_reg_predictor #(type BUSTYPE=int) extends uvm_component;
   virtual function void write(BUSTYPE tr);
      uvm_reg rg;
      uvm_reg_bus_op rw;
+     int unsigned array_size;
     if (adapter == null)
      `uvm_fatal("REG/WRITE/NULL","write: adapter handle is null") 
 
@@ -189,7 +190,20 @@ class uvm_reg_predictor #(type BUSTYPE=int) extends uvm_component;
        foreach (map_info.addr[i]) begin
          if (rw.addr == map_info.addr[i]) begin
             found = 1;
-           reg_item.value[0] |= rw.data << (i * map.get_n_bytes()*8);
+           //reg_item.value[0] |= rw.data << (i * map.get_n_bytes()*8);
+           //call bus2reg multiple times to get full data.
+           //BOZO implement this later. current use tr to assign data to reg_item directly.
+           array_size = tr.reg_length / `UVM_REG_DATA_WIDTH + ((tr.reg_length % `UVM_REG_DATA_WIDTH == 0) ? 0 : 1);
+           
+           reg_item.value.delete();
+           reg_item.value.new[array_size];
+           
+           for(int i=0; i<array_size-1; i++)
+              for(int j=0; j<`UVM_REG_DATA_WIDTH;j++) reg_item.value[i][j] = tr.wr_data_q.pop_front();
+           foreach(tr.wr_data_q[i]) reg_item.value[array_size-1][i] = tr.wr_data_q.pop_front();
+           
+           reg_item.n_bits = tr.reg_length;
+
            predict_info.addr[rw.addr] = 1;
            if (predict_info.addr.num() == map_info.addr.size()) begin
               // We've captured the entire abstract register transaction.
@@ -217,12 +231,12 @@ class uvm_reg_predictor #(type BUSTYPE=int) extends uvm_component;
               if(reg_item.kind == UVM_WRITE)
                 `uvm_info("REG_PREDICT", {"Observed WRITE transaction to register ",
                          ir.get_full_name(), ": value='h",
-                         $sformatf("%0h",reg_item.value[0]), " : updated value = 'h", 
+                         $sformatf("%0h",rg.print_array_value(reg_item)), " : updated value = 'h", 
                          $sformatf("%0h",ir.get())},UVM_HIGH)
               else
                 `uvm_info("REG_PREDICT", {"Observed READ transaction to register ",
                          ir.get_full_name(), ": value='h",
-                         $sformatf("%0h",reg_item.value[0])},UVM_HIGH)
+                         $sformatf("%0h",rg.print_array_value(reg_item))},UVM_HIGH)
               reg_ap.write(reg_item);
               m_pending.delete(rg);
            end
