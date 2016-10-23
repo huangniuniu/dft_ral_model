@@ -8629,7 +8629,6 @@ class dft_register_block extends dft_reg_block;
       reg_map.add_reg( .rg( tmdpphy_1_scanconfig_reg), .offset( `TMDPPHY_1_SCANCONFIG_ADDR), .rights( "RW" ) );
       reg_map.add_reg( .rg( gddr5_ioctrl_reg), .offset( `GDDR5_IOCTRL_ADDR), .rights( "RW" ) );
 
-
       sms_reg_map = create_map( .name( "sms_reg_map" ), .base_addr( 0 ),.n_bytes( `MAX_N_BYTES ), .endian( UVM_LITTLE_ENDIAN ) );
       sms_reg_map.add_reg( .rg( sptap_jpc_sms_sel_reg), .offset( `SPTAP_JPC_SMS_SEL_ADDR), .rights( "RW" ) );
       sms_reg_map.add_reg( .rg( sptap_jpc_udr_sel_reg), .offset( `SPTAP_JPC_UDR_SEL_ADDR), .rights( "RW" ) );

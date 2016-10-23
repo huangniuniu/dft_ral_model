@@ -26,6 +26,11 @@ virtual class dft_reg_block extends uvm_reg_block;
    
    function new(string name="", int has_coverage=UVM_NO_COVERAGE);
       super.new(name,has_coverage);
+      hdl_paths_pool = new("hdl_paths");
+      this.has_cover = has_coverage;
+      // Root block until registered with a parent
+      m_roots[this] = 0;
+
    endfunction: new
    
    virtual function dft_reg_map create_dft_map(string name,
@@ -35,7 +40,7 @@ virtual class dft_reg_block extends uvm_reg_block;
                                                   bit byte_addressing=1);
    
       dft_reg_map  map;
-   
+      uvm_reg_map  temp_map;   
       if (this.locked) begin
          `uvm_error("RegModel", "Cannot add map to locked model");
          return null;
@@ -43,10 +48,11 @@ virtual class dft_reg_block extends uvm_reg_block;
    
       map = dft_reg_map::type_id::create(name,,this.get_full_name());
       map.configure(this,base_addr,n_bytes,endian,byte_addressing);
-   
-      this.maps[map] = 1;
+  
+      temp_map = map;
+      this.maps[temp_map] = 1;
       if (maps.num() == 1)
-        default_map = map;
+        default_map = temp_map;
    
       return map;
    endfunction

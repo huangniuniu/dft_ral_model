@@ -40,8 +40,9 @@ class dft_reg_map extends uvm_reg_map;
 
    function new(string name = "dft_reg_map");
       super.new(name);
+      m_auto_predict = 0;
+      m_check_on_read = 0;
    endfunction: new
-
    
    // do_bus_write
    virtual task do_bus_write (uvm_reg_item rw, uvm_sequencer_base sequencer, uvm_reg_adapter adapter);
@@ -63,6 +64,14 @@ class dft_reg_map extends uvm_reg_map;
      uvm_sequence_item  bus_req;
      uvm_reg_bus_op     rw_access;
      uvm_reg_data_t     data;
+     dft_reg            access_rg;
+     
+     if ($cast(access_rg,rw.element)) begin             
+        `uvm_info(get_type_name(), $sformatf("Current regsiter being written is dft_reg TYPE"), UVM_NONE);
+     end
+     else begin
+        `uvm_error(get_type_name(), $sformatf("Current regsiter being written is not dft_reg TYPE"))
+     end
 
      Xget_bus_infoX(rw, map_info, n_bits_init, lsb, skip);
      addrs=map_info.addr;
@@ -115,10 +124,12 @@ class dft_reg_map extends uvm_reg_map;
    
          //data = (value >> (curr_byte*8)) & ((1'b1 << (bus_width * 8))-1);
          data = value;
-         if (reg_bus_op_num == 1)
-            `uvm_info(get_type_name(), $sformatf("Writing 'h%0h at 'h%0h via map \"%s\"...", rw.value[val_idx], {1'b0,addrs[0][`UVM_REG_ADDR_WIDTH-1:0]}, rw.map.get_full_name()), UVM_FULL);
-         else 
-            `uvm_info(get_type_name(), $sformatf("Sending package %0d to adapter, data being transfered is %0h", val_idx, data, UVM_FULL);
+         if (val_idx == reg_bus_op_num - 1) begin
+            `uvm_info(get_type_name(), $sformatf("Writing 'h%0h at 'h%0h via map \"%s\"...", access_rg.print_array_value(rw), {1'b0,addrs[0][`UVM_REG_ADDR_WIDTH-1:0]}, rw.map.get_full_name()), UVM_FULL);
+         end
+         else begin
+            `uvm_info(get_type_name(), $sformatf("Sending package %0d to adapter, data being transfered is %0h", val_idx, data), UVM_FULL);
+         end
          //if (rw.element_kind == UVM_FIELD) begin
          //  for (int z=0;z<bus_width;z++)
          //    rw_access.byte_en[z] = byte_en[curr_byte+z];
@@ -138,7 +149,6 @@ class dft_reg_map extends uvm_reg_map;
             //adapter.m_set_item(rw);
             //bus_req = adapter.reg2bus(rw_access);
             //adapter.m_set_item(null);
-            //STOP HERE 
             if (bus_req == null)
               `uvm_fatal("RegMem",{"adapter [",adapter.get_name(),"] didnt return a bus transaction"});
             
@@ -166,10 +176,8 @@ class dft_reg_map extends uvm_reg_map;
             //  rw.parent.post_do(rw);
    
             rw.status = rw_access.status;
-   
-            `uvm_info(get_type_name(),
-               $sformatf("Wrote 'h%0h at 'h%0h via map \"%s\": %s...",
-               rw.value[val_idx], {1'b0,addrs[0][`UVM_REG_ADDR_WIDTH-1:0]}, rw.map.get_full_name(), rw.status.name()), UVM_FULL)
+            //`uvm_info(get_type_name(), $sformatf("Wrote 'h%0h at 'h%0h via map \"%s\": %s...", rw.value[val_idx], {1'b0,addrs[0][`UVM_REG_ADDR_WIDTH-1:0]}, rw.map.get_full_name(), rw.status.name()), UVM_FULL)
+            `uvm_info(get_type_name(), $sformatf("Wrote 'h%0h at 'h%0h via map \"%s\": %s...", access_rg.print_array_value(rw), {1'b0,addrs[0][`UVM_REG_ADDR_WIDTH-1:0]}, rw.map.get_full_name(), rw.status.name()), UVM_FULL)
    
             if (rw.status == UVM_NOT_OK)
                break;
