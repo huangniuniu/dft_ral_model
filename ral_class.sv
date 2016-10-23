@@ -8102,7 +8102,7 @@ endclass: ieee1500_gddr5_ioctrl_reg
 // Class: dft_register_block
 //------------------------------------------------------------------------------
 
-class dft_register_block extends uvm_reg_block;
+class dft_register_block extends dft_reg_block;
    `uvm_object_utils( dft_register_block )
 
 //==================add by hcai1 begin=================//
@@ -8552,7 +8552,7 @@ class dft_register_block extends uvm_reg_block;
       gddr5_ioctrl_reg.build();
       
       //reg_map = create_map( .name( "reg_map" ), .base_addr( `DFT_REG_ADDR_WIDTH'b0 ),.n_bytes( `MAX_N_BYTES ), .endian( UVM_LITTLE_ENDIAN ) );
-      reg_map = create_map( .name( "dft_reg_map" ), .base_addr( 0 ),.n_bytes( `MAX_N_BYTES ), .endian( UVM_LITTLE_ENDIAN ) );
+      reg_map = create_dft_map( .name( "dft_reg_map" ), .base_addr( 0 ),.n_bytes( `MAX_N_BYTES ), .endian( UVM_LITTLE_ENDIAN ) );
       //================add by hcai1 begin=========================//
       reg_map.add_reg( .rg( mtap_wbypass_reg ), .offset( `IEEE_1149_WBYPASS_ADDR), .rights( "RW" ) );
       reg_map.add_reg( .rg( mtap_pipelinemode_reg ), .offset( `IEEE_1149_PIPELINEMODE_ADDR), .rights( "RW" ) );

@@ -198,7 +198,9 @@ task dft_write(output uvm_status_e      status,
    
    if(remainder!=0)
       for(int i=0; i<remainder; i++) rw.value[value_size-1][i] = value_q.pop_front();
-
+   
+   `uvm_info("DFT_REG",$sformatf("Writing %s to %s",print_array_value(rw),this.get_full_name()),UVM_NONE);
+   
    do_write(rw);
 
    status = rw.status;
@@ -400,34 +402,61 @@ task do_write (uvm_reg_item rw);
 endtask: do_write
 
 
-function string print_array_value (uvm_reg_item rw);
-   int unsigned         array_size;
-   int unsigned         remainder;
-   int unsigned         total_bits;
-   uvm_reg_data_t       value;
-   string               s;
-   array_size = rw.value.size();
-
-   foreach(m_fields[i]) total_bits+= m_fields[i].get_n_bits;
-
-   remainder = total_bits - `UVM_REG_DATA_WIDTH*(array_size-1);
-
-   if(`UVM_REG_DATA_WIDTH % 4 != 0) `uvm_warning("RegModel", "UVM_REG_DATA_WIDTH%4 != 0, will cause dft_print_array_value error.");
-
-   for(int i=0; i<array_size-1; i++) begin
-      foreach(rw.value[i][j]) value[j] = rw.value[i][j];
-      $sformat(s,"%0h%s",value,s);
-   end
-
-   begin
-      for(int j=0; j<remainder; j++) value[j] = rw.value[array_size-1][j];
-      $sformat(s,"%0h%s",value,s);
-   end
-
-   $sformat(s,"%d'h%s",total_bits,s);
-   return s;
-endfunction: print_array_value 
-
+   function string print_array_value (uvm_reg_item rw);
+      int unsigned         array_size;
+      int unsigned         remainder;
+      int unsigned         total_bits;
+      bit                  value_q[$];
+      string               s;
+      array_size = rw.value.size();
+   
+      foreach(m_fields[i]) total_bits+= m_fields[i].get_n_bits;
+   
+      remainder = total_bits - `UVM_REG_DATA_WIDTH*(array_size-1);
+   
+      if(`UVM_REG_DATA_WIDTH % 4 != 0) `uvm_warning("RegModel", "UVM_REG_DATA_WIDTH%4 != 0, will cause dft_print_array_value error.");
+   
+      for(int i=0; i<array_size-1; i++)
+         for(int j=0; j<`UVM_REG_DATA_WIDTH; j++) value_q.push_back(rw.value[i][j]);
+   
+      for(int j=0; j<remainder; j++) value_q.push_back(rw.value[array_size-1][j]);
+   
+      s = this.bin2hex(value_q);
+      return s;
+   endfunction: print_array_value 
+    
+   function string bin2hex( bit q_data[$]);
+       string     s;
+       int unsigned hex_value,q_length;
+       int unsigned four_bits_num;
+       int unsigned remainder;
+       bit          temp_q_data[];  
+       q_length = q_data.size();
+       four_bits_num = q_length / 4;
+       remainder = q_length % 4;
+       temp_q_data = new[q_length];
+       
+       foreach( q_data[i] ) temp_q_data[i] = q_data[i];
+       $sformat(s, "%s%0d'h",s,q_length);
+       
+       if (remainder != 0) begin
+           if (remainder == 1)
+               hex_value = temp_q_data[four_bits_num*4];
+           else if (remainder == 2)
+               hex_value = temp_q_data[four_bits_num*4 + 1] *2 + temp_q_data[four_bits_num*4];
+           else if (remainder == 3)
+               hex_value = temp_q_data[four_bits_num*4 + 2] *4 + temp_q_data[four_bits_num*4 + 1] *2 + temp_q_data[four_bits_num*4];
+           $sformat(s, "%s%0h",s,hex_value);
+       end 
+       
+       for ( int i = four_bits_num-1; i >= 0; i--) begin
+           hex_value = temp_q_data[i*4+3] *8 + temp_q_data[i*4+2] *4 + temp_q_data[i*4+1] *2 + temp_q_data[i*4];
+           $sformat(s, "%s%0h",s,hex_value);
+       end
+       temp_q_data.delete(); 
+       return s;
+    endfunction: bin2hex
+ 
 
 //Rui added/modified start
 endclass: dft_reg

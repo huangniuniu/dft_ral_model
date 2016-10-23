@@ -33,7 +33,7 @@ class dft_reg_map extends uvm_reg_map;
 
    //Rui UVM1.2 only local uvm_reg_transaction_order_policy policy;
 
-   extern /*local*/ function void Xinit_address_mapX();
+   //Rui comment out extern /*local*/ function void Xinit_address_mapX();
 
    static local uvm_reg_map   m_backdoor;
 
@@ -115,10 +115,10 @@ class dft_reg_map extends uvm_reg_map;
    
          //data = (value >> (curr_byte*8)) & ((1'b1 << (bus_width * 8))-1);
          data = value;
-         `uvm_info(get_type_name(),
-            $sformatf("Writing 'h%0h at 'h%0h via map \"%s\"...",
-            rw.value[val_idx], {1'b0,addrs[0][`UVM_REG_ADDR_WIDTH-1:0]}, rw.map.get_full_name()), UVM_FULL);
-   
+         if (reg_bus_op_num == 1)
+            `uvm_info(get_type_name(), $sformatf("Writing 'h%0h at 'h%0h via map \"%s\"...", rw.value[val_idx], {1'b0,addrs[0][`UVM_REG_ADDR_WIDTH-1:0]}, rw.map.get_full_name()), UVM_FULL);
+         else 
+            `uvm_info(get_type_name(), $sformatf("Sending package %0d to adapter, data being transfered is %0h", val_idx, data, UVM_FULL);
          //if (rw.element_kind == UVM_FIELD) begin
          //  for (int z=0;z<bus_width;z++)
          //    rw_access.byte_en[z] = byte_en[curr_byte+z];
@@ -138,7 +138,7 @@ class dft_reg_map extends uvm_reg_map;
             //adapter.m_set_item(rw);
             //bus_req = adapter.reg2bus(rw_access);
             //adapter.m_set_item(null);
-            
+            //STOP HERE 
             if (bus_req == null)
               `uvm_fatal("RegMem",{"adapter [",adapter.get_name(),"] didnt return a bus transaction"});
             
@@ -147,7 +147,7 @@ class dft_reg_map extends uvm_reg_map;
    
             //if (rw.parent != null && i == 0)
             //  rw.parent.mid_do(rw);
-   
+             
             rw.parent.finish_item(bus_req);
             bus_req.end_event.wait_on();
    
